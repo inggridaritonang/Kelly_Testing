@@ -1,25 +1,28 @@
+import os
+import pymysql
 import streamlit as st
 import pandas as pd
 from PyPDF2 import PdfReader
 from io import BytesIO
-import pymysql
 from openai import OpenAI
 import numpy as np
-import os
+from dotenv import load_dotenv
 
 # ---------------- CONFIG ----------------
-
+load_dotenv()  # baca file .env (lokal)
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+client = OpenAI(api_key=OPENAI_API_KEY)
 
 st.set_page_config(page_title="📊 Its Kelly!", layout="wide")
 
 # ---------------- DATABASE CONNECTION ----------------
 def get_conn():
     return pymysql.connect(
-        host="localhost",
-        user="root",
-        password="Exraid2009",
-        database="user_db",
+        host=os.getenv("DB_HOST", "localhost"),
+        port=int(os.getenv("DB_PORT", 3306)),
+        user=os.getenv("DB_USER", "root"),
+        password=os.getenv("DB_PASSWORD", "Exraid2009"),
+        database=os.getenv("DB_NAME", "user_db"),
         cursorclass=pymysql.cursors.DictCursor
     )
 
@@ -58,11 +61,9 @@ def generate_data_summary(df: pd.DataFrame):
 
 # ---------------- CHUNK & AI ANALYSIS ----------------
 def analyze_large_file(text, query, chunk_size=10000):
-    # Step 1: Split text into chunks
     chunks = [text[i:i+chunk_size] for i in range(0, len(text), chunk_size)]
     partial_summaries = []
 
-    # Step 2: Analyze each chunk
     for i, chunk in enumerate(chunks):
         response = client.chat.completions.create(
             model="gpt-4o-mini",
@@ -75,7 +76,6 @@ def analyze_large_file(text, query, chunk_size=10000):
         )
         partial_summaries.append(response.choices[0].message.content)
 
-    # Step 3: Combine summaries into final answer
     combined_summary = "\n\n".join(partial_summaries)
     final_response = client.chat.completions.create(
         model="gpt-4o-mini",
@@ -147,7 +147,6 @@ def show_audit_report_tab():
 
     if len(selected_files) == 0:
         return
-
     if len(selected_files) > 2:
         st.warning("⚠️ Please select maximum 2 files only.")
         return
@@ -202,7 +201,6 @@ def show_audit_report_tab():
                     }))
             texts.append(extracted_text)
 
-    # AI Compare or Single Analysis
     query = st.text_input("💬 Ask AI to analyze these file(s):")
     if query:
         with st.spinner("AI is analyzing..."):
