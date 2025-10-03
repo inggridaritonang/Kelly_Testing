@@ -5,6 +5,7 @@ from io import BytesIO
 import pymysql
 from openai import OpenAI
 import numpy as np
+import os
 
 # ---------------- CONFIG ----------------
 
