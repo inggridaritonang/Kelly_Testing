@@ -18,13 +18,14 @@ st.set_page_config(page_title="📊 Its Kelly!", layout="wide")
 # ---------------- DATABASE CONNECTION ----------------
 def get_conn():
     return pymysql.connect(
-        host=os.getenv("DB_HOST", "localhost"),
-        port=int(os.getenv("DB_PORT", 3306)),
-        user=os.getenv("DB_USER", "root"),
-        password=os.getenv("DB_PASSWORD", "Exraid2009"),
-        database=os.getenv("DB_NAME", "user_db"),
+        host=st.secrets["DB_HOST"],
+        port=int(st.secrets["DB_PORT"]),
+        user=st.secrets["DB_USER"],
+        password=st.secrets["DB_PASSWORD"],
+        database=st.secrets["DB_NAME"],
         cursorclass=pymysql.cursors.DictCursor
     )
+
 
 # ---------------- DB FUNCTIONS ----------------
 def save_file_to_db(file_name, file_data):
