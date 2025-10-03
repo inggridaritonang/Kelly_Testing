@@ -4,3 +4,4 @@ PyPDF2
 pymysql
 openai
 numpy
+python-dotenv
